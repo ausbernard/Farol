@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="beamW" x1="336" y1="122" x2="226" y2="122" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2CB63" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#F2CB63" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="beamE" x1="336" y1="122" x2="446" y2="122" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2CB63" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#F2CB63" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- soft vertical flare, same short length -->
+  <g opacity="0.4">
+    <path d="M336 122 L226 86 L226 158 Z" fill="url(#beamW)"/>
+    <path d="M336 122 L446 86 L446 158 Z" fill="url(#beamE)"/>
+  </g>
+  <!-- brighter core, fading at the tips -->
+  <path d="M336 122 L226 102 L226 142 Z" fill="url(#beamW)"/>
+  <path d="M336 122 L446 102 L446 142 Z" fill="url(#beamE)"/>
+  <!-- body blobs -->
+  <rect x="132" y="174" width="150" height="218" rx="75" fill="#143A9E"/>
+  <circle cx="352" cy="264" r="80" fill="#143A9E"/>
+  <!-- beacon -->
+  <circle cx="336" cy="122" r="42" fill="#2BA866"/>
+</svg>

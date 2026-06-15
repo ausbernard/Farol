@@ -1,21 +1,44 @@
-# Farol
-*lighthouse* - in Portuguese.
+<div align="center">
+  <img src="/assets/farol-lighthouse.svg" width="400" alt="farol" /><br/><br/>
+  <strong>lighthouse — deploy health at a glance</strong><br/><br/>
+  <img src="https://img.shields.io/badge/backend-FastAPI-teal.svg" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/frontend-React%20%2B%20Vite-61dafb.svg" alt="React + Vite" />
+</div>
 
-<img src="/assets/farol-lighthouse.svg" alt=" lighthouse illustration in a playful, hand-drawn style" />
+---
 
+A read-only service that proxies a platform API, reshapes the data, and surfaces deploy health across projects. Point it at a Railway account and get a clean status view — no dashboards to wrangle, no noise.
 
-A read-only service that proxies a platform API, reshapes the data, and surfaces deploy health across projects.
+## The view
 
-## Stack
+```sh
+# start the backend
+uvicorn app.main:app --reload
+
+# latest deploy + recent history for your service
+curl http://localhost:8000/api/status
+```
+
+```json
+{
+  "latest": { "id": "...", "status": "SUCCESS", "createdAt": "..." },
+  "history": [{ "id": "...", "status": "FAILED", "createdAt": "..." }]
+}
+```
+
+Then open the frontend at `http://localhost:5173` for the status card UI.
 
 ## Structure
+
 ```
-deploy-dashboard/
+Farol/
 ├── backend/    # FastAPI service
 └── frontend/   # Vite + React app
 ```
 
-## Running the backend
+## Running
+
+**Backend**
 
 ```bash
 cd backend
@@ -25,7 +48,15 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Then visit `http://localhost:8000/docs` to try the API.
+API docs at `http://localhost:8000/docs`.
+
+**Frontend**
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ## Configuration
 
@@ -38,14 +69,3 @@ RAILWAY_SERVICE_ID=...
 ```
 
 Use a Railway **account** token (created with "No workspace"), not a project token.
-
-## API
-
-`GET /api/status` returns the latest deploy and recent history for a service:
-
-```json
-{
-  "latest": { "id": "...", "status": "SUCCESS", "createdAt": "..." },
-  "history": [ { "id": "...", "status": "FAILED", "createdAt": "..." } ]
-}
-```
