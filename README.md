@@ -69,3 +69,9 @@ RAILWAY_SERVICE_ID=...
 ```
 
 Use a Railway **account** token (created with "No workspace"), not a project token.
+
+---
+<div align="center">
+  <strong>The Internet is who Claude and I jammed to while making this</strong><br/><br/>
+  <img src="/assets/the_internet.jpg" width="400" alt="the internet is who claude and i jammed with while making this" /><br/><br/>
+</div>
