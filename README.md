@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="/assets/lighthouse.jpg" width="400" alt="farol" /><br/><br/>
+  <img src="/assets/lighthouse.jpg" width="200" alt="farol" /><br/><br/>
   <strong>lighthouse — deploy health at a glance</strong><br/><br/>
   <img src="https://img.shields.io/badge/backend-FastAPI-teal.svg" alt="FastAPI" />
   <img src="https://img.shields.io/badge/frontend-React%20%2B%20Vite-61dafb.svg" alt="React + Vite" />
