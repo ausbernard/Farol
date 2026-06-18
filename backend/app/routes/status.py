@@ -6,13 +6,6 @@ router = APIRouter()
 
 RAILWAY_API = "https://backboard.railway.com/graphql/v2"
 
-QUERY = """
-query deployments($input: DeploymentListInput!) {
-  deployments(input: $input, first: 10) {
-    edges { node { id status createdAt meta environment { name } service { name } } }
-  }
-}
-"""
 
 EXCLUDED_STATUSES = {"REMOVED"}
 
@@ -32,8 +25,73 @@ def shape_deployment(node):
         "url": f"https://github.com/{repo}/actions" if repo else None,
     }
 
+@router.get("/api/raw")
+async def raw_payload_to_vigia_state():
+    QUERY = """
+    query($workspaceId: String!) { projects(workspaceId: $workspaceId) { edges { node { name services { edges { node { name deployments(first: 1) { edges { node { status statusUpdatedAt url staticUrl meta } } } } } } } } } }
+    """
+    # 1. build headers (Bearer token from env) + variables (project/service IDs)
+    headers = {
+        "Authorization": f"Bearer {settings.railway_token}",
+    }
+
+    variables = {
+        "workspaceId": settings.railway_workspace_id,
+    }
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.post(
+            RAILWAY_API,
+            headers=headers,
+            json = {
+                "query": QUERY,
+                "variables": variables,
+            }
+        )
+    
+    # Transport layer first — did the request even reach a GraphQL server?
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "kind": "transport",
+                "status_code": response.status_code,
+                "body": response.text[:500] # truncate non-json bodies
+            }
+        )
+    
+    # Now we know it's 200, so the body should be GraphQL-shaped JSON.
+    payload = response.json()
+    
+    # Application layer — server reached, but it didn't like it.
+    if payload and "errors" in payload:
+        raise HTTPException(
+            status_code=502,
+            detail= {
+                "kind": "graphql",
+                "errors": [
+                    {
+                        "code": e.get("extensions", {}).get("code"),
+                        "message": e.get("message"),
+                        "trace_id": e.get("traceId")
+                    }
+                    for e in payload["errors"]
+                ],
+            },
+        )
+
+    return payload
+
 @router.get("/api/status")
 async def get_status():
+
+    QUERY = """
+    query deployments($input: DeploymentListInput!) {
+    deployments(input: $input, first: 10) {
+        edges { node { id status createdAt meta environment { name } service { name } } }
+    }
+    }
+    """
     # 1. build headers (Bearer token from env) + variables (project/service IDs)
     headers = {
         "Authorization": f"Bearer {settings.railway_token}",

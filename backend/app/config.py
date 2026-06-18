@@ -4,6 +4,7 @@ class Settings(BaseSettings):
     railway_token: str
     railway_project_id: str
     railway_service_id: str
+    railway_workspace_id: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
