@@ -5,7 +5,9 @@ Each transform function owns one node type. Composition runs top-down: fleet -> 
 """
 
 from typing import Any
-from .status import map_deployment_status, relative_age, roll_up_worst, VigiaStatus
+
+from .status import map_deployment_status, relative_age, roll_up_worst
+
 
 def _transform_service(service_node: dict[str, Any]) -> dict[str, Any]:
     """One Railway project noce -> one vigia service row"""

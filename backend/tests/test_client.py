@@ -1,4 +1,5 @@
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from fastapi import HTTPException
 
@@ -8,7 +9,6 @@ from app.services.railway.client import (
     _transport_error,
     fetch_catalog,
 )
-
 
 # --- sync helpers ------------------------------------------------------------
 
@@ -104,7 +104,7 @@ async def test_execute_missing_data_key_raises_502():
 async def test_fetch_catalog_delegates_with_workspace_id():
     payload = {"data": {"projects": {"edges": []}}}
     ctx = _mock_http_client(200, payload)
-    with patch("app.services.railway.client.httpx.AsyncClient", return_value=ctx) as MockClient:
+    with patch("app.services.railway.client.httpx.AsyncClient", return_value=ctx):
         await fetch_catalog("ws-123")
     call_kwargs = ctx.__aenter__.return_value.post.call_args
     assert "ws-123" in str(call_kwargs)

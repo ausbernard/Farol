@@ -7,6 +7,7 @@ Errors are translated into HTTPException with a `kind` discriminator ('transport
 """
 
 from typing import Any
+
 import httpx
 from fastapi import HTTPException
 

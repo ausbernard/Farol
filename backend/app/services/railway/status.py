@@ -4,8 +4,9 @@ Status mapping and rollup logic for vigia
 Single source of truth for what "healthy" / "down" / "building" / "unknown" actually mean. Anything that needs to collect a status - service level, project level, fleet-level, all come through this module.
 """
 
-from typing import Iterable, Literal
+from collections.abc import Iterable
 from datetime import datetime, timezone
+from typing import Literal
 
 VigiaStatus = Literal["healthy", "building", "down", "unknown"]
 

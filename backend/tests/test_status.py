@@ -1,8 +1,7 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 from app.services.railway import status
-
 
 # --- map_deployment_status ---------------------------------------------------
 

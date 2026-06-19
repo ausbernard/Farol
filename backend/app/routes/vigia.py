@@ -2,11 +2,11 @@
 Routes are thin: fetch, transform, return. No business logic here.
 """
 
-import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+
+from app.config import settings
 from app.services.railway.client import fetch_catalog
 from app.services.railway.transform import transform_to_vigia_state
-from app.config import settings
 
 router = APIRouter()
 
