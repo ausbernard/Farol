@@ -23,7 +23,7 @@ def _transform_service(service_node: dict[str, Any]) -> dict[str, Any]:
             "age": ""
         }
 
-    deploy = deployments[0]["nodes"]
+    deploy = deployments[0]["node"]
     meta = deploy.get("meta") or {}
     status = map_deployment_status(deploy.get("status"))
     age = relative_age(deploy.get("statusUpdatedAt"))
@@ -87,5 +87,36 @@ def _transform_project(project_node: dict[str, Any]) -> dict[str, Any]:
         "status": roll_up_worst(s["status"] for s in services)
 
     }
-        
-        
+
+def transform_to_vigia_state(
+        graphql_response: dict[str, Any],
+        expected_projects: list[str] | None = None,
+) -> dict[str, Any]:
+    """
+    Railway GraphQL catalog response -> vigia fleet shape.
+
+    `expected_projects` is the list of project names you expect to see (ie. from a config file). Any project in the list that railway didn't return gets emitted as `found: false` - the grey "verify source" row.
+
+    Without this, missing projects would silently vanish. Safeguard this.
+    
+    """
+    edges = graphql_response.get("projects", {}).get("edges", [])
+    projects = [_transform_project(edge["node"]) for edge in edges]
+
+    if expected_projects:
+        returned_names = {p["name"] for p in projects}
+        for expected in expected_projects:
+            if expected not in returned_names:
+                projects.append({
+                    "id": expected,
+                    "name": expected,
+                    "found": False,
+                    "note": "not found on railyway - verify source.",
+                    "services": [],
+                })
+    
+    return {
+        "refreshedAgo": "just now",
+        "projects": projects,
+        "activity": [],
+    }
