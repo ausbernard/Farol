@@ -7,14 +7,15 @@ Errors are translated into HTTPException with a `kind` discriminator ('transport
 """
 
 from typing import Any
+
 import httpx
 from fastapi import HTTPException
 
 from app.config import settings
 
 RAILWAY_API = "https://backboard.railway.com/graphql/v2"
-DEFAULT_TIMEOUT = 10.0          # seconds
-ERROR_BODY_TRUNCATE = 500       # cap non-JSON error bodies in logs/responses
+DEFAULT_TIMEOUT = 10.0  # seconds
+ERROR_BODY_TRUNCATE = 500  # cap non-JSON error bodies in logs/responses
 
 # --- queries ----------------------------------------------------------------
 # Kept as module-level constants, not inline in functions. Easy to diff, easy
@@ -36,6 +37,7 @@ query($workspaceId: String!) {
 }
 """
 
+
 # --- public API -------------------------------------------------------------
 async def fetch_catalog(workspace_id: str) -> dict[str, Any]:
     """Fetch the project/service/deployment catalog for a workspace.
@@ -45,13 +47,14 @@ async def fetch_catalog(workspace_id: str) -> dict[str, Any]:
 
     return await _execute(query=_CATALOG_QUERY, variables={"workspaceId": workspace_id})
 
+
 # --- internals ---------------------------------------------------------------
 async def _execute(
-        query: str,
-        variables: dict[str, Any],
+    query: str,
+    variables: dict[str, Any],
 ) -> dict[str, Any]:
     """Single chokepoint for every GraphQL call. Handles transport + GraphQL errors"""
-    headers = { "Authorization": f"Bearer {settings.railway_token}" }
+    headers = {"Authorization": f"Bearer {settings.railway_token}"}
 
     async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
         response = await client.post(
@@ -60,16 +63,13 @@ async def _execute(
             json={
                 "query": query,
                 "variables": variables,
-            }
+            },
         )
-    
+
     # Transport layer first — did the request even reach a GraphQL server?
     if response.status_code != 200:
-        raise HTTPException(
-            status_code=502,
-            detail=_transport_error(response)
-        )
-    
+        raise HTTPException(status_code=502, detail=_transport_error(response))
+
     # Now we know it's 200, so the body should be GraphQL-shaped JSON.
     payload = response.json()
 
@@ -77,30 +77,28 @@ async def _execute(
     if "errors" in payload:
         raise HTTPException(
             status_code=502,
-            detail= _graphql_error(payload["errors"]),
+            detail=_graphql_error(payload["errors"]),
         )
-    
+
     if "data" not in payload or payload["data"] is None:
-        raise HTTPException (
+        raise HTTPException(
             status_code=502,
-            detail={
-                "kind": "graphql", 
-                "errors": [{"message": "no data in response"}]
-            },
+            detail={"kind": "graphql", "errors": [{"message": "no data in response"}]},
         )
-    
 
     return payload["data"]
+
 
 def _transport_error(response: httpx.Response) -> dict[str, Any]:
     """Structured detail for non-200 responses (network, auth, gateway)"""
     return {
         "kind": "transport",
         "status_code": response.status_code,
-        "body": response.text[:ERROR_BODY_TRUNCATE] # truncate non-json bodies
+        "body": response.text[:ERROR_BODY_TRUNCATE],  # truncate non-json bodies
     }
 
-def _graphql_error(errors: list[dict[str,Any]]) -> dict[str, Any]:
+
+def _graphql_error(errors: list[dict[str, Any]]) -> dict[str, Any]:
     """Structured detail for 200-OK responses with GraphQL errors (validation, schema)."""
     return {
         "kind": "graphql",
@@ -108,7 +106,7 @@ def _graphql_error(errors: list[dict[str,Any]]) -> dict[str, Any]:
             {
                 "code": e.get("extensions", {}).get("code"),
                 "message": e.get("message"),
-                "trace_id": e.get("traceId")
+                "trace_id": e.get("traceId"),
             }
             for e in errors
         ],

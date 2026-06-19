@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     railway_token: str
@@ -16,5 +17,6 @@ class Settings(BaseSettings):
         return [name.strip() for name in v.split(",") if name.strip()]
 
     model_config = SettingsConfigDict(env_file=".env")
+
 
 settings = Settings()
