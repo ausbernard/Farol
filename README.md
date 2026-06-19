@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="/assets/farol-lighthouse.svg" width="400" alt="farol" /><br/><br/>
-  <strong>lighthouse — deploy health at a glance</strong><br/><br/>
+  <img src="/assets/lighthouse.jpg" width="300" alt="vigia" /><br/><br/>
+  <strong>vigia — deploy health at a glance</strong><br/><br/>
   <img src="https://img.shields.io/badge/backend-FastAPI-teal.svg" alt="FastAPI" />
   <img src="https://img.shields.io/badge/frontend-React%20%2B%20Vite-61dafb.svg" alt="React + Vite" />
 </div>
@@ -31,7 +31,7 @@ Then open the frontend at `http://localhost:5173` for the status card UI.
 ## Structure
 
 ```
-Farol/
+vigia/
 ├── backend/    # FastAPI service
 └── frontend/   # Vite + React app
 ```
@@ -69,3 +69,9 @@ RAILWAY_SERVICE_ID=...
 ```
 
 Use a Railway **account** token (created with "No workspace"), not a project token.
+
+---
+<div align="center">
+  <strong>The Internet is who Claude and I jammed to while making this</strong><br/><br/>
+  <img src="/assets/the_internet.jpg" width="400" alt="the internet is who claude and i jammed with while making this" /><br/><br/>
+</div>

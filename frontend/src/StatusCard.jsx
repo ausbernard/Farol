@@ -146,10 +146,10 @@ function Header({ serviceName }) {
           style={{
             width: 28, height: 28, borderRadius: 8, background: "#25252f",
             border: "1px solid rgba(255,255,255,0.08)", display: "flex",
-            alignItems: "center", justifyContent: "center", fontSize: 13,
+            alignItems: "center", justifyContent: "center",
           }}
         >
-          🚂
+          <img src="/assets/vigia-clean.svg" alt="vigia" style={{ width: 18, height: 18 }} />
         </div>
         <div style={{ textAlign: "left" }}>
           <div style={{ color: "#f4f4f5", fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>
