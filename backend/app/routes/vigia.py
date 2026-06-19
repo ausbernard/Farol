@@ -12,6 +12,7 @@ router = APIRouter()
 
 RAILWAY_API = "https://backboard.railway.com/graphql/v2"
 
+
 @router.get("/api/state")
 async def get_vigia_state():
     raw = await fetch_catalog(settings.railway_workspace_id)
