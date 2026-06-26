@@ -7,6 +7,8 @@
 
 ---
 
+![vigia dashboard](/assets/dashboard.png)
+
 A read-only service that proxies the Railway API, reshapes the data, and surfaces deploy health across projects. Point it at a Railway workspace and get a clean status dashboard — no noise.
 
 ## The view
