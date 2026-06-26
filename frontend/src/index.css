@@ -68,10 +68,6 @@ code {
   background: var(--code-bg);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .stat-row {
   display: flex;
   flex-wrap: wrap;
@@ -87,4 +83,9 @@ code {
   .stat-card {
     flex: 1;
   }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
