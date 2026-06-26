@@ -89,18 +89,16 @@ export default function Dashboard() {
         marginBottom: 24,
         borderBottom: "1px solid #27272a",
       }}>
-        {/* left: logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 18, height: 18, borderRadius: "50%",
-            border: "2px solid #34d399",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#34d399" }} />
-          </div>
-          <span style={{ fontSize: 18, fontWeight: 600, color: "#fafafa" }}>vigia</span>
-          {/* <span style={{ fontSize: 13, color: "#71717a" }}>deployment health</span> */}
-        </div>
+      {/* left: logo */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+          <circle cx="12" cy="12" r="10" stroke="#34d399" strokeWidth="2" />
+          <circle cx="12" cy="12" r="5.5" stroke="#34d399" strokeWidth="2" />
+          <circle cx="12" cy="12" r="2" fill="#34d399" />
+        </svg>
+        <span style={{ fontSize: 18, fontWeight: 600, color: "#fafafa" }}>vigia</span>
+        {/* <span style={{ fontSize: 13, color: "#71717a" }}>deployment health</span> */}
+      </div>
 
         {/* right: controls */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
