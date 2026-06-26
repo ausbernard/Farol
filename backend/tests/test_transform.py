@@ -1,4 +1,5 @@
 from app.services.railway.transform import (
+    _summarize,
     _transform_project,
     _transform_service,
     transform_to_vigia_state,
@@ -206,3 +207,75 @@ def test_fleet_no_expected_projects():
     raw = _graphql_response([_project_node("proj")])
     result = transform_to_vigia_state(raw, expected_projects=None)
     assert len(result["projects"]) == 1
+
+
+def test_fleet_includes_summary():
+    raw = _graphql_response([_project_node("proj")])
+    result = transform_to_vigia_state(raw)
+    assert "summary" in result
+
+
+# --- _summarize --------------------------------------------------------------
+
+
+def test_summarize_empty():
+    s = _summarize([])
+    assert s == {
+        "status": "unknown",
+        "total": 0,
+        "healthy": 0,
+        "building": 0,
+        "down": 0,
+        "unknown": 0,
+        "missing": 0,
+    }
+
+
+def test_summarize_counts():
+    projects = [
+        {"name": "a", "status": "healthy"},
+        {"name": "b", "status": "down"},
+        {"name": "c", "status": "building"},
+        {"name": "d", "status": "unknown"},
+    ]
+    s = _summarize(projects)
+    assert s["total"] == 4
+    assert s["healthy"] == 1
+    assert s["down"] == 1
+    assert s["building"] == 1
+    assert s["unknown"] == 1
+    assert s["missing"] == 0
+
+
+def test_summarize_rollup_status_is_worst():
+    projects = [
+        {"name": "a", "status": "healthy"},
+        {"name": "b", "status": "down"},
+    ]
+    assert _summarize(projects)["status"] == "down"
+
+
+def test_summarize_missing_counted_separately():
+    projects = [
+        {"name": "a", "status": "healthy", "found": True},
+        {"name": "ghost", "found": False, "services": []},
+    ]
+    s = _summarize(projects)
+    assert s["total"] == 2
+    assert s["healthy"] == 1
+    assert s["missing"] == 1
+    assert s["unknown"] == 0
+    assert s["status"] == "healthy"  # missing doesn't affect rollup
+
+
+def test_summarize_math_adds_up():
+    projects = [
+        {"name": "a", "status": "healthy", "found": True},
+        {"name": "b", "status": "unknown", "found": True},
+        {"name": "ghost", "found": False, "services": []},
+    ]
+    s = _summarize(projects)
+    assert (
+        s["healthy"] + s["building"] + s["down"] + s["unknown"] + s["missing"]
+        == s["total"]
+    )
