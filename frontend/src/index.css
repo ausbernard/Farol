@@ -9,10 +9,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   min-height: 100%;
+  background: #09090b;
+  color: #e4e4e7;
 }
 
 #root {
@@ -63,4 +66,26 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stat-card {
+  flex: 0 1 calc(33.333% - 8px);
+  box-sizing: border-box;
+}
+
+@media (min-width: 900px) {
+  .stat-card {
+    flex: 1;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

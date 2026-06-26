@@ -25,11 +25,18 @@ _CATALOG_QUERY = """
 query($workspaceId: String!) {
   projects(workspaceId: $workspaceId) {
     edges { node {
+      id
       name
+      environments { edges { node { id name } } }
       services { edges { node {
+        id
         name
         deployments(first: 1) { edges { node {
-          status statusUpdatedAt url staticUrl meta
+          id
+          status statusUpdatedAt createdAt
+          url staticUrl meta
+          canRollback canRedeploy
+          environmentId
         } } }
       } } }
     } }

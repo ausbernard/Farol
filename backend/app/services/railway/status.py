@@ -29,8 +29,14 @@ _RAILWAY_STATUS_MAP: dict[str, VigiaStatus] = {
 }
 
 # Worst-child-wins rollup ordering: index = severity
-_SEVERITY = ["healthy", "unknown", "building", "down"]
-
+'''
+healthy — all good (least severe)
+unknown — can't tell (mild)
+building — actively deploying
+degraded — something's wrong but partial (your empty-but-expected wolf)
+down — failed (most severe)
+'''
+_SEVERITY = ["healthy", "unknown", "building", "degredaded" "down"]
 
 def map_deployment_status(raw: str | None) -> VigiaStatus:
     """Maps Railways deployment status to vigia's four states"""
@@ -42,7 +48,7 @@ def map_deployment_status(raw: str | None) -> VigiaStatus:
 def roll_up_worst(statuses: Iterable[VigiaStatus]) -> VigiaStatus:
     """Project rollup: most severe child status wins."""
     if not statuses:
-        return "unknown"
+        return "degraded"
     worst = max(
         statuses,
         key=lambda s: (

@@ -6,12 +6,12 @@ Each transform function owns one node type. Composition runs top-down: fleet -> 
 
 from typing import Any
 
-from .status import map_deployment_status, relative_age, roll_up_worst
+from .status import VigiaStatus, map_deployment_status, relative_age, roll_up_worst
 
 
-def _transform_service(service_node: dict[str, Any]) -> dict[str, Any]:
+def _transform_service(service_node: dict[str, Any], env_names: dict[str, str]) -> dict[str, Any]:
     """One Railway project noce -> one vigia service row"""
-
+    service_id = service_node.get("id") or service_node.get("name", "unknown")
     name = service_node.get("name", "unknown")
 
     # Latest deployment (we ask for first: 1, may be empty if never deployed)
@@ -27,39 +27,42 @@ def _transform_service(service_node: dict[str, Any]) -> dict[str, Any]:
 
     deploy = deployments[0]["node"]
     meta = deploy.get("meta") or {}
-    status = map_deployment_status(deploy.get("status"))
-    age = relative_age(deploy.get("statusUpdatedAt"))
+    env_id = deploy.get("environmentId")
+
 
     # Detect service kind: if there's a commitHash, it's an app deploy.
     # Otherwise it's a managed / template servce (Postgres, Reis, etc).
 
+    base = {
+        "id": service_id, 
+        "name": name,
+        "status": map_deployment_status(deploy.get("status")),
+        "age": relative_age(deploy.get("statusUpdatedAt")),
+        "deploymentId": deploy.get("id"),
+        "canRollback": deploy.get("canRollback", False),
+        "canRedeploy": deploy.get("canRedeploy", False),
+        "environment": env_names.get(env_id),
+        "environmentId": env_id,
+    }
+
     commit_hash = meta.get("commitHash")
     if commit_hash:
         return {
-            "id": name,  # use name as stable ID for now
-            "name": name,
-            "status": status,
+            **base,
             "ref": commit_hash[:7],  # short-sha, like git's default
             "branch": meta.get("branch", "main"),
-            "age": age,
             "url": deploy.get("staticUrl") or deploy.get("url"),
         }
 
-    else:
-        return {
-            "id": name,  # use name as stable ID for now
-            "name": name,
-            "status": status,
-            "source": "managed",
-            "age": age,
-        }
+    return {**base, "source": "managed"}
 
 
 def _transform_project(project_node: dict[str, Any]) -> dict[str, Any]:
     """One Railway project node → one vigia project group, with rollup."""
     name = project_node.get("name", "unknown")
     service_edges = project_node.get("services", {}).get("edges", [])
-
+    env_edges = project_node.get("environments", {}).get("edges", [])
+    env_names = {e["node"]["id"]: e["node"]["name"] for e in env_edges}
     # Empty services case: project exists but nothing has been deployed yet.
     # Render honestly - not green, not red, not a fake "healthy" badge.
 
@@ -70,15 +73,15 @@ def _transform_project(project_node: dict[str, Any]) -> dict[str, Any]:
             "found": True,
             "empty": True,
             "services": [],
-            "status": "unknown",
+            "status": "degraded",
         }
 
-    services = [_transform_service(edge["node"]) for edge in service_edges]
+    services = [_transform_service(edge["node"], env_names) for edge in service_edges]
 
     # Try to get and surface the project's publi domain from any service that has one.
     domain = next((s.get("url") for s in services if s.get("url")), None)
 
-    return {
+    return { 
         "id": name,  # use name as stable ID for now
         "name": name,
         "found": True,
@@ -119,6 +122,25 @@ def transform_to_vigia_state(
 
     return {
         "refreshedAgo": "just now",
+        "summary": _summarize(projects),
         "projects": projects,
         "activity": [],
+    }
+
+
+def _summarize(projects: list[dict[str, Any]]) -> dict[str, Any]:
+    missing = sum(1 for p in projects if not p.get("found", True))
+    statuses: list[VigiaStatus] = [p["status"] for p in projects if "status" in p]
+    counts: dict[str, int] = {"healthy": 0, "building": 0, "down": 0, "unknown": 0, "degraded":0}
+    for s in statuses:
+        counts[s] = counts.get(s, 0) + 1
+    return {
+        "overall": roll_up_worst(statuses),
+        "total": len(projects),
+        "healthy": counts["healthy"],
+        "building": counts["building"],
+        "down": counts["down"],
+        "unknown": counts["unknown"],
+        "degraded": counts["degraded"],
+        "missing": missing,
     }
