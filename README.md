@@ -7,7 +7,7 @@
 
 ---
 
-A read-only service that proxies a platform API, reshapes the data, and surfaces deploy health across projects. Point it at a Railway account and get a clean status view — no dashboards to wrangle, no noise.
+A read-only service that proxies the Railway API, reshapes the data, and surfaces deploy health across projects. Point it at a Railway workspace and get a clean status dashboard — no noise.
 
 ## The view
 
@@ -15,18 +15,27 @@ A read-only service that proxies a platform API, reshapes the data, and surfaces
 # start the backend
 uvicorn app.main:app --reload
 
-# latest deploy + recent history for your service
-curl http://localhost:8000/api/status
+# fleet state: all projects + services + summary counts
+curl http://localhost:8000/api/state
 ```
 
 ```json
 {
-  "latest": { "id": "...", "status": "SUCCESS", "createdAt": "..." },
-  "history": [{ "id": "...", "status": "FAILED", "createdAt": "..." }]
+  "refreshedAgo": "just now",
+  "summary": { "total": 3, "healthy": 2, "building": 1, "down": 0, "degraded": 0, "missing": 0 },
+  "projects": [
+    {
+      "id": "my-app", "name": "my-app", "found": true, "status": "healthy",
+      "services": [
+        { "id": "...", "name": "web", "status": "healthy", "ref": "a1b2c3d", "branch": "main", "age": "2h ago" }
+      ]
+    }
+  ],
+  "activity": []
 }
 ```
 
-Then open the frontend at `http://localhost:5173` for the status card UI.
+Then open the frontend at `http://localhost:5173` for the Dashboard.
 
 ## Structure
 
@@ -58,14 +67,18 @@ npm install
 npm run dev
 ```
 
+Copy `frontend/.env.template` to `frontend/.env` and set `VITE_API_URL` if the backend isn't on the same origin.
+
 ## Configuration
 
 Create `backend/.env` (not committed):
 
 ```
 RAILWAY_TOKEN=your_account_token
+RAILWAY_WORKSPACE_ID=...
 RAILWAY_PROJECT_ID=...
 RAILWAY_SERVICE_ID=...
+EXPECTED_PROJECTS=my-app,another-app   # optional, comma-separated
 ```
 
 Use a Railway **account** token (created with "No workspace"), not a project token.
